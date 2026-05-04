@@ -43,9 +43,7 @@ class Solution {
     private void dijkstra(int start){
         PriorityQueue<Node> pq = new PriorityQueue<>((a, b) -> a.cost - b.cost);
         dists[start] = 0;
-        for(int next : graph[start]){
-            pq.offer(new Node(start, next, 1));
-        }
+        pq.offer(new Node(start, 0));
         
         while(!pq.isEmpty()){
             Node cur = pq.poll();
@@ -54,24 +52,21 @@ class Solution {
                 continue;
             }
             
-            dists[cur.to] = cur.cost;
-            
             for(int next : graph[cur.to]){
                 int nextDist = cur.cost + 1;
-                if(nextDist < dists[next] ){
-                    pq.offer(new Node(cur.to, next, nextDist));
+                if(nextDist < dists[next]){
+                    dists[next] = nextDist;
+                    pq.offer(new Node(next, nextDist));
                 }
             }
         }
     }
     
     static class Node{
-        int from;
         int to;
         int cost;
         
-        public Node(int from, int to, int cost){
-            this.from = from;
+        public Node(int to, int cost){
             this.to = to;
             this.cost = cost;
         }
