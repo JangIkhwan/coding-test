@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.*;
 
 class Solution {
     /*
@@ -16,29 +17,19 @@ class Solution {
         List<List<Integer>> sets = new ArrayList<>();
         
         s = s.substring(2, s.length() - 2);
-        int prevIndex = 0;
-        while(true){
-            int index = s.indexOf("},{", prevIndex);
-            if(index == -1){
-                break;
-            }
-            String setString = s.substring(prevIndex, index);
-            String[] numStrings = setString.split(",");
-           
+        String[] strs = s.split("\\},\\{");
+        
+        // System.out.println(Arrays.toString(strs));
+        
+        
+        for(String str : strs){
+            String[] numStrs = str.split(",");
             List<Integer> set = new ArrayList<>();
-            for(String n : numStrings){
+            for(String n : numStrs){
                 set.add(Integer.parseInt(n));
             }
             sets.add(set);
-            prevIndex = index + 3;
         }
-        String setString = s.substring(prevIndex, s.length());
-        String[] numStrings = setString.split(",");
-        List<Integer> temp = new ArrayList<>();
-        for(String n : numStrings){
-            temp.add(Integer.parseInt(n));
-        }
-        sets.add(temp);
         
         
         // System.out.println(sets);
