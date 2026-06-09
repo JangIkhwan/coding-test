@@ -36,123 +36,44 @@ class Solution {
     이 조건 중 하나만 맞으면 true다.
     
     ---
+   
+    어떤 구간에서 마지막에 남는 값은 어떻게 알지?
     
-    a[i...j]에서 남길 수 있는 최댓값과 최솟값은 어떻게 구하나?
+    관찰 결과 큰 것만 제거하면 해당 구간에서 최솟값이 마지막에 남을 수 있다
     
-    최솟값은 해당 구간에서 최솟값을 구하면 되어서 쉬움
     
-    최댓값은? 두번째로 가장 작은 값이 최댓값이 된다
+    중요한 관찰 :
     
-    ---
-    
-    dp[i][j][0] : i ~ j 구간에서 가장 작은 값
-    dp[i][j][1] : i ~ j 구간에서 두번째로 작은 값
+    양쪽에 현재 풍선보다 작은 값이 존재하는 경우에는 현재 풍선이 지워질 수 밖에 없다!!
     
     */
     public int solution(int[] a) {
         if(a.length < 3){
             return a.length;
         }
+      
+        int[] leftMin = new int[a.length];
         
-        // dp를 계산한다
-        int[][] left = new int[a.length][2];
-        
-        int min = a[0];
-        int secondMin = a[0];
-        for(int i = 0; i < a.length; i++){
-            if(a[i] < min){
-                secondMin = min;
-                min = a[i];
-            }
-            else{
-                if(a[i] < secondMin){
-                    secondMin = a[i];
-                }
-            }
-            
-            left[i][0] = min;
-            left[i][1] = secondMin;
+        leftMin[0] = Integer.MAX_VALUE;
+        for(int i = 1; i < a.length; i++){
+            leftMin[i] = Math.min(a[i - 1], leftMin[i - 1]);
         }
         
-        int[][] right = new int[a.length][2];
-
-        min = a[a.length - 1];
-        secondMin = a[a.length - 1];
-        for(int i = a.length - 1; i >= 0; i--){
-            if(a[i] < min){
-                secondMin = min;
-                min = a[i];
-            }
-            else{
-                if(a[i] < secondMin){
-                    secondMin = a[i];
-                }
-            }
-            
-            right[i][0] = min;
-            right[i][1] = secondMin;
+        int[] rightMin = new int[a.length];
+        
+        rightMin[a.length - 1] = Integer.MAX_VALUE;
+        for(int i = a.length - 2; i >= 0; i--){
+            rightMin[i] = Math.min(a[i + 1], rightMin[i + 1]);
         }
         
-//         for(int i = 0; i < a.length; i++){
-//             System.out.print(left[i][0] + " ");
-//         }
-//         System.out.println();
-        
-//         for(int i = 0; i < a.length; i++){
-//             System.out.print(left[i][1] + " ");
-//         }
-//         System.out.println();
-        
-//         for(int i = 0; i < a.length; i++){
-//             System.out.print(right[i][0] + " ");
-//         }
-//         System.out.println();
-        
-//         for(int i = 0; i < a.length; i++){
-//             System.out.print(right[i][1] + " ");
-//         }
-//         System.out.println();
-        
-        // dp를 이용해서 각 원소가 마지막까지 남을 수 있는지 판정한다
         int answer = 0;
         
-        if(a[0] < right[1][0] || a[0] > right[1][0]){
-            // System.out.println(a[0] + " can be last");
-            answer++;
-        }
-        
-        for(int i = 1; i < a.length - 1; i++){
-            if(canBeLast(a[i], left[i - 1], right[i + 1])){
-                // System.out.println(a[i] + " can be last"); 
+        for(int i = 0; i < a.length; i++){
+            if(leftMin[i] >= a[i] || rightMin[i] >= a[i]){
                 answer++;
             }
         }
         
-        if(a[a.length - 1] < left[a.length - 2][0] || a[a.length - 1] > left[a.length - 2][0]){
-            // System.out.println(a[a.length - 1] + " can be last");
-            answer++;
-        }
-        
         return answer;
-    }
-    
-    private boolean canBeLast(int value, int[] left, int[] right){
-        if(value < left[0] && value < right[0]){
-            return true;
-        }
-        if(value > left[0] && value < right[0]){
-            return true;
-        }
-        if(value < left[0] && value > right[0]){
-            return true;
-        }
-        if(value < left[1] && value < right[0]){
-            return true;
-        }
-        if(value < left[0] && value < right[1]){
-            return true;
-        }
-        
-        return false;
     }
 }
