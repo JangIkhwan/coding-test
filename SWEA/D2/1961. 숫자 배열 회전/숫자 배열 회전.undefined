@@ -1,0 +1,62 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+   
+    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static int N;
+    static int[][] arr;
+
+    public static void main(String[] args) throws IOException {
+        int T = Integer.parseInt(br.readLine());
+
+        StringBuffer sb = new StringBuffer();
+        for(int test = 1; test <= T; test++){
+           init();
+
+           int[][] rotated90 = rotate90(arr);
+           int[][] rotated180 = rotate90(rotated90);
+           int[][] rotated270 = rotate90(rotated180);
+
+           sb.append("#" + test + "\n");
+           for(int r = 1; r <= N; r++){
+               sb.append(rowToString(rotated90[r]) + " ");
+               sb.append(rowToString(rotated180[r]) + " ");
+               sb.append(rowToString(rotated270[r]));
+               sb.append("\n");
+           }
+        }
+        System.out.println(sb.toString());
+    }
+
+    static void init() throws IOException{
+        N = Integer.parseInt(br.readLine());
+
+        arr = new int[N + 1][N + 1];
+        for(int r = 1; r <= N; r++){
+            String line = br.readLine();
+            StringTokenizer st = new StringTokenizer(line);
+            for(int c = 1; c <= N; c++){
+                arr[r][c] = Integer.parseInt(st.nextToken());
+            }
+        }
+    }
+
+    static int[][] rotate90(int[][] arr){
+        int[][] rotated = new int[N + 1][N + 1];
+        for(int row = 1; row <= N; row++){
+            for(int col = 1; col <= N; col++){
+                rotated[col][N + 1 - row] = arr[row][col];
+            }
+        }
+        return rotated;
+    }
+
+    static String rowToString(int[] row){
+        StringBuffer sb = new StringBuffer();
+        for(int c = 1; c <= N; c++){
+            sb.append(row[c]);
+        }
+        return sb.toString();
+    }
+}
