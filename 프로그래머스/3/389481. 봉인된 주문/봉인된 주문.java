@@ -1,82 +1,107 @@
+import java.util.*;
+
 class Solution {
     /*
-    26/5/1 13:10 ~ 14:10
+    17:20 ~ 
     
-    정렬된 주문에서 일부 주분을 지웠을 때 N번째 주문을 구하자
+    주문서에서 일부 주문을 제거했을 때 n번째 주문을 구하자
     
-    log N보다 작은 시간복잡도가 필요할 것 같다
+    ---
     
-    K번째 주문을 알 수 있다면 해결할 수 있음
+    getSpell(i) : i번째 주문을 리턴하는 함수
+    가 있다면
     
-    - bans에서 K번째 주문보다 앞에 나온 주문의 개수를 구하고
-    다시 주문을 구하면 된다.
+    getSpell(n + removed)으로 n번째 주문을 구할 수 있다
     
-    원래 K번째 주문을 구할 수 있을까?
+    ---
     
-    1 -> 0 -> a
-    26 -> 25 -> z
-    26 + 1 -> 26 -> aa
-    26 + 26 -> 26 + 25 -> az
-    26*2 + 1 -> 26*2 -> ba
-    26*2 + 26 -> 26*2 + 25 -> bz
+    getSpell()을 만들 수 있을까?
     
-    26*26 + 26 -> 26*26 + 25 -> zz
-    26*26*1 + 26*1 + 1 ->  26*26*1 + 26*1 -> aaa
+    1 : a
+    26 : z
+    26^1 + 1 : aa
+    26^2 : az
+    2*26^1 + 1 : ba
+    26^2 + 26 : zz
+    26^2 + 26^1 + 1 : aaa
+    26*26^2 + 26*26^1 + 26 : zzz
     
+    0 : a
+    25 : z
+    26^1 + 0 : aa
+    26^1 + 25 : az
+    2*26^1 + 0 : ba
+    26^2 + 25 : zz
+    1 * 26^2 + 1 * 26^1 + 0 : aaa
+    26*26^2 + 26*26^1 + 25 : zzz
     
-    aabaa -> 26 + 2*26*26 + 26*26*26 + 26*26*26*26 + 1
-
+    26진법과 유사하지만 0의 개념이 없다
     */
-    public String solution(long n, String[] bans) {     
-        long lo = 0;
-        long hi = 1000_000_000_000_000L + 1;
-        while(lo + 1 < hi){
-            long mid = (lo + hi) / 2;
+    
+    public String solution(long n, String[] bans) {
+        String cur = getSpell(n - 1);
+        String next = null;
+        
+        Arrays.sort(bans, (a, b) -> {
+            if(a.length() < b.length()){
+                return -1;
+            } 
+            if(a.length() == b.length()){
+                return a.compareTo(b);
+            } 
+            return 1;
+        });
+        
+        while(true){
+            int removed = getRemoved(bans, cur);
             
-            String original = findKthOrder(mid);
-            // System.out.println("ori = " + original); // 
+            next = getSpell(n - 1 + removed);
             
-            long removed = countRemovedOrder(original, bans);
-            // System.out.println("mid - removed = " + (mid - removed));
-            
-            if(mid - removed >= n){
-                hi = mid;
+            if(cur.equals(next)){
+                break;
             }
-            else{
-                lo = mid;
-            }
+
+            cur = next;
         }
         
-        String answer = findKthOrder(hi);
-        // System.out.println("answer = " + answer + " hi =" + hi);
-        
-        return answer;
+        return next;
     }
     
-    private long countRemovedOrder(String original, String[] bans){
-       long count = 0;
-        
-        for(String ban : bans){
-            if(ban.length() < original.length() || ban.length() == original.length() && ban.compareTo(original) <= 0){
-                count++;
-            }
+    private String getSpell(long index){
+        if(index <= 0){
+            return "a";
         }
         
-        return count;
-    }
-    
-    private String findKthOrder(long index){
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
+        sb.append((char) ('a' + index % 26));
         
-        while(index > 0){
-            long rightMost = (index - 1) % 26;
-            
-            sb.append((char) ('a' + rightMost));
-            
-            index = (index - 1) / 26;
+        index = index - 26;
+        while(index >= 0){
+            index = index / 26;  
+            sb.append((char) ('a' + index % 26));
+            index = index - 26;
         }
         
         sb.reverse();
         return sb.toString();
+    }
+    
+    private int getRemoved(String[] bans, String cur){
+        int hi = bans.length;
+        int lo = -1;
+        while(lo + 1 < hi){
+            int mid = (lo + hi) / 2;
+            if(isBeforeOrEquals(bans[mid], cur)){
+                lo = mid;
+            }
+            else{
+                hi = mid;
+            }
+        }
+        return lo + 1;
+    }
+    
+    private boolean isBeforeOrEquals(String a, String b){
+        return a.length() < b.length() || a.length() == b.length() && a.compareTo(b) <= 0;
     }
 }
