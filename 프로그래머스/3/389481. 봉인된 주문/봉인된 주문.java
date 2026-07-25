@@ -38,33 +38,44 @@ class Solution {
     26진법과 유사하지만 0의 개념이 없다
     */
     
-    public String solution(long n, String[] bans) {
-        String cur = getSpell(n - 1);
-        String next = null;
+    public String solution(long n, String[] bans) {   
+        int removed = 0;
         
-        Arrays.sort(bans, (a, b) -> {
-            if(a.length() < b.length()){
-                return -1;
-            } 
-            if(a.length() == b.length()){
-                return a.compareTo(b);
-            } 
-            return 1;
-        });
-        
-        while(true){
-            int removed = getRemoved(bans, cur);
-            
-            next = getSpell(n - 1 + removed);
-            
-            if(cur.equals(next)){
-                break;
+        Set<Long> set = new HashSet<>();
+        for(String b : bans){
+            long i = getIndex(b);
+            set.add(i);
+            if(i <= n - 1){
+                removed++;
             }
-
-            cur = next;
         }
         
-        return next;
+        // System.out.println(set);
+        
+        long index = n - 1;
+        for(int i = 0; i < removed; i++){
+            index++;
+            while(set.contains(index)){
+                index++;
+            }
+        }
+        
+        // System.out.println(index);
+       
+        return getSpell(index);
+    }
+    
+    private long getIndex(String spell){
+        long index = 0;
+        for(int i = 0; i < spell.length(); i++){
+            if(i == spell.length() - 1){
+                index += spell.charAt(i) - 'a';                
+            }
+            else{
+                index += Math.pow(26, spell.length() - i - 1) * (spell.charAt(i) - 'a' + 1);
+            }
+        }
+        return index;
     }
     
     private String getSpell(long index){
@@ -84,24 +95,5 @@ class Solution {
         
         sb.reverse();
         return sb.toString();
-    }
-    
-    private int getRemoved(String[] bans, String cur){
-        int hi = bans.length;
-        int lo = -1;
-        while(lo + 1 < hi){
-            int mid = (lo + hi) / 2;
-            if(isBeforeOrEquals(bans[mid], cur)){
-                lo = mid;
-            }
-            else{
-                hi = mid;
-            }
-        }
-        return lo + 1;
-    }
-    
-    private boolean isBeforeOrEquals(String a, String b){
-        return a.length() < b.length() || a.length() == b.length() && a.compareTo(b) <= 0;
     }
 }
