@@ -2,75 +2,67 @@ import java.util.*;
 
 class Solution {
     /*
-    26/5/7 14:01 ~ 
+    26-8-6 0:40 ~ 
     
-    당첨에서 제외해야할 아이디 목록의 모든 경우의 수를 구하자
+    ===
     
-    아아디 길이 <= L
-    주어진 입력의 길이 <= 8 = N
-    불량 사용자 아이디의 길이 <= 8 = M
+    제재대상 리스트의 경우의 수를 구하자
+    아이디 목록에서 순서는 상관이 없다
     
-    불량 사용자 아이디에는 같은 문자열이 들어갈 수 있다
-    
-    완전탐색으로 풀 수 있을까?
-    불량사용자와 사용자 아이디를 매칭하는 조합을 계산하면 어떨까?
-    
-    경우의 수 P(N, M) = 8!
-    
-    O(N! * M * N * L)  
-    시간 초과는 안일어날 것 같음
-    
-    같은 내용의 아이디 목록은 한번만 세야한다
+    내가 선택한 아이디들이 이전에 본 것인지 알 수 있게
+    방문 여부를 메모이제이션하자
     
     */
-    private int answer = 0;
-    private boolean[] selected;
-    private boolean[] counted;
-    
+    int answer = 0;
+    String [] UserId;
+    String[] BannedId;
+    int[] selected;
+    boolean[] seen;
+        
     public int solution(String[] user_id, String[] banned_id) {
-        selected = new boolean[user_id.length];
-        counted = new boolean[1 << 9];
-                    
-        countCases(banned_id.length, 0, 0, user_id, banned_id);
+        UserId = user_id;
+        BannedId = banned_id;
+        
+        selected = new int[BannedId.length];
+        
+        seen = new boolean[1<<8];
+       
+        makeBlackList(0, 0, 0);
         
         return answer;
     }
     
-    private void countCases(int depth, int prev, int state, String[] user_id, String[] banned_id){
-        if(depth == 0){
-            // System.out.println("state = " + state);
-            if(!counted[state]){
-                answer++;  
-                counted[state] = true;
+    private void makeBlackList(int depth, int banCount, int state){
+        if(depth >= UserId.length){
+            if(!seen[state] && banCount == BannedId.length){
+                System.out.println(Arrays.toString(selected));
+                seen[state] = true;
+                answer += 1;
             }
             return;
         }
-        
-        // System.out.println("depth = " + depth);
-        // System.out.println("selected = " + Arrays.toString(selected));
-        
-        for(int i = 0; i < user_id.length; i++){
-            if(selected[i]){
+         
+        for(int j = 0; j < BannedId.length; j++){
+            if(selected[j] > 0){
                 continue;
             }
-            
-            boolean matched = matched(user_id[i], banned_id[depth - 1]);
-            // System.out.println("userId = " + user_id[i] + " bannedId = " + banned_id[depth - 1]);
-            // System.out.println("matched = " + matched);
-            if(matched){
-                selected[i] = true;
-                countCases(depth - 1, i, state | (1 << i), user_id, banned_id);
-                selected[i] = false;
+            if(isMatched(UserId[depth], BannedId[j])){
+                selected[j] = depth + 1;
+                int nextState = state | (1 << depth);
+                makeBlackList(depth + 1, banCount + 1, nextState);
+                selected[j] = 0;
             }
         }
+        
+        makeBlackList(depth + 1, banCount, state);
     }
     
-    private boolean matched(String userId, String bannedId){
-        if(userId.length() != bannedId.length()){
+    private boolean isMatched(String user, String ban){
+        if(user.length() != ban.length()){
             return false;
         }
-        for(int i = 0; i < userId.length(); i++){
-            if(!(bannedId.charAt(i) == '*' || userId.charAt(i) == bannedId.charAt(i))){
+        for(int i = 0; i < user.length(); i++){
+            if(user.charAt(i) != ban.charAt(i) && ban.charAt(i) != '*'){
                 return false;
             }
         }
